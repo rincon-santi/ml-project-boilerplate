@@ -1,0 +1,13 @@
+/data/features/*
+/data/interim/*
+/data/raw/*
+/data/validation/*
+.dvc/config.local
+.dvc/tmp
+.dvc/cache
+
+# Keep data folders
+!/data/features/.gitignore
+!/data/interim/.gitignore
+!/data/raw/.gitignore
+!/data/validation/.gitignore

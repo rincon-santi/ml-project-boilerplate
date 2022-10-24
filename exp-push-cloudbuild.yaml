@@ -1,0 +1,30 @@
+steps:
+- id: 'Reproduce pipeline'
+  name: tensorflow/tensorflow
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    mkdir data/raw
+    mkdir data/interim
+    mkdir data/processed
+    export ORIGIN_BUCKET=$_ORIGIN_BUCKET
+    export PROJECT_ID=$PROJECT_ID
+    export VAL_SOURCE='validation'
+    pip install -r requirements.txt
+    dvc pull --run-cache
+    dvc repro
+- id: 'Report metrics'
+  name: iterativeai/cml:0-dvc2-base1-gpu
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    echo "## Metrics"
+    dvc metrics diff develop --show-md >> report.md
+    dvc metrics show --show-md >> report.md
+    
+    dvc plots show
+    cml publish --md dvc_plots/index.html >> report.md
+
+    cat report.md

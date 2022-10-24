@@ -1,0 +1,4 @@
+# General parameters
+experiment_id: 'dnn_basic_0.0.2'
+metrics: [{METRICS list}]
+loss: '{LOSS_METRIC}'

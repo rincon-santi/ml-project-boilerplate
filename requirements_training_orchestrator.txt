@@ -1,0 +1,11 @@
+fastapi[all]
+protobuf==3.19.5
+fastavro==1.5.1
+rsa==4.7.2
+google-cloud-aiplatform
+docker
+pandas
+numpy
+tensorflow
+gcsfs
+google-cloud-aiplatform[prediction]>=1.16.0

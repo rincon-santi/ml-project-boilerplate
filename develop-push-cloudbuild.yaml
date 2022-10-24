@@ -1,0 +1,27 @@
+steps:
+- id: 'Pull latest image'
+  name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    docker pull {TRAINING IMAGE TAG (must be Container/Artifact Registry compliant)}:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', '{TRAINING IMAGE TAG (must be Container/Artifact Registry compliant)}:$SHORT_SHA', '.' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'push', '{TRAINING IMAGE TAG (must be Container/Artifact Registry compliant)}:$SHORT_SHA']
+- name: 'eu.gcr.io/inlab-develop-bq/utils/alpine-docker-py'
+  entrypoint: bash
+  args:
+  - '-c'
+  - |
+    pip install --no-cache-dir -r "requirements_training_orchestrator.txt" --user
+    export PROJECT_ID=$PROJECT_ID
+    export STAGING_BUCKET={GCS staging bucket}
+    export TRAIN_IMAGE="{TRAINING IMAGE TAG (must be Container/Artifact Registry compliant)}:$SHORT_SHA"
+    export DEPLOY_IMAGE='{SERVING IMAGE TAG (must be Container/Artifact Registry compliant)}:$SHORT_SHA'
+    export MACHINE_TYPE=$_MACHINE_TYPE
+    export MODEL_DISPLAY_NAME=$_MODEL_DISPLAY_NAME
+    export JOB_DISPLAY_NAME=$_JOB_DISPLAY_NAME
+    export ORIGIN_BUCKET=$_ORIGIN_BUCKET
+    python vertex-workflow.py
