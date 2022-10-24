@@ -1,0 +1,5 @@
+[core]
+    remote = default
+    autostage = true
+['remote "default"']
+    url = $DVC_REMOTE_CACHE

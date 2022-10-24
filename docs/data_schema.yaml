@@ -1,0 +1,6 @@
+# Here must be specified input data field & types
+
+## Schema description:
+## - name: {FIELD_NAME}
+##   type: {TYPE in ('string', 'int', 'float')}
+##   null_values: {NULLVALUES list}

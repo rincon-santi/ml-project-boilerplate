@@ -1,0 +1,74 @@
+stages:
+  get-data:
+    cmd: python src/data/data_recovering.py training
+    deps: 
+    - src/data/data_recovering.py
+    - docs/data_schema.yaml
+    outs:
+    - data/raw
+    params:
+    - params/params.yaml:
+        - experiment_id
+  clean-data:
+    cmd: jupyter nbconvert --execute --to notebook src/data/data_cleaning.ipynb
+    deps:
+    - data/raw
+    - src/data/data_cleaning.ipynb
+    - src/data/data_cleaning_utils.py
+    outs:
+    - data/interim/clean.avro
+    params:
+    - params/params.yaml:
+        - experiment_id
+  generate-features:
+    cmd: python src/features/data_to_features.py
+    deps:
+    - data/interim/clean.avro
+    - src/features/data_to_features.py
+    - src/features/data_to_features_function.py
+    - src/features/data_to_features_utils.py
+    outs:
+    - data/features/training_features.avro
+    - docs/feature_schema.json:
+        cache: false
+    params:
+    - params/params.yaml:
+        - experiment_id
+    - params/data-params.yaml:
+        - label_column
+  train-model:
+    cmd: python src/model/train_model.py
+    deps:
+    - data/features/training_features.avro
+    - src/model/train_model.py
+    - docs/feature_schema.json
+    outs:
+    - trained_model
+    params:
+    - params/params.yaml:
+        - metrics
+        - loss
+    - params/data-params.yaml:
+        - label_column
+    - params/train-params.yaml
+  get-validation-data:
+    cmd: python src/data/data_recovering.py validation
+    deps: 
+    - src/data/data_recovering.py
+    outs:
+    - data/validation
+  validate:
+    cmd: jupyter nbconvert --execute --to notebook --inplace src/model/validate_model.ipynb
+    deps:
+    - src/model/validate_model.ipynb
+    - src/features/data_to_features_function.py
+    - data/validation
+    - trained_model
+    params:
+    - params/data-params.yaml:
+        - label_column
+    metrics:
+    - metrics/validation_results.json:
+        cache: false
+
+
