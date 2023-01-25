@@ -6,40 +6,30 @@ stages:
     - docs/data_schema.yaml
     outs:
     - data/raw
-    params:
-    - params/params.yaml:
-        - experiment_id
   clean-data:
-    cmd: jupyter nbconvert --execute --to notebook src/data/data_cleaning.ipynb
+    cmd: python src/data/data_cleaning.py
     deps:
     - data/raw
-    - src/data/data_cleaning.ipynb
-    - src/data/data_cleaning_utils.py
+    - src/data/data_cleaning.py
     outs:
-    - data/interim/clean.avro
+    - data/interim
     params:
-    - params/params.yaml:
-        - experiment_id
+    - params/data-params.yaml:
   generate-features:
     cmd: python src/features/data_to_features.py
     deps:
-    - data/interim/clean.avro
+    - data/interim
     - src/features/data_to_features.py
-    - src/features/data_to_features_function.py
-    - src/features/data_to_features_utils.py
     outs:
-    - data/features/training_features.avro
+    - data/features
     - docs/feature_schema.json:
         cache: false
     params:
-    - params/params.yaml:
-        - experiment_id
     - params/data-params.yaml:
-        - label_column
   train-model:
     cmd: python src/model/train_model.py
     deps:
-    - data/features/training_features.avro
+    - data/features
     - src/model/train_model.py
     - docs/feature_schema.json
     outs:
@@ -58,15 +48,13 @@ stages:
     outs:
     - data/validation
   validate:
-    cmd: jupyter nbconvert --execute --to notebook --inplace src/model/validate_model.ipynb
+    cmd: python serving/validate.py
     deps:
-    - src/model/validate_model.ipynb
-    - src/features/data_to_features_function.py
+    - serving/validate.py
     - data/validation
     - trained_model
     params:
     - params/data-params.yaml:
-        - label_column
     metrics:
     - metrics/validation_results.json:
         cache: false

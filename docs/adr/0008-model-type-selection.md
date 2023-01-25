@@ -1,4 +1,4 @@
-# 7. Model Type Selection
+# 8. Model Type Selection
 
 Date: 2022-10-24
 
